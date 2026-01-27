@@ -22,27 +22,22 @@ client.connect()
     const db = client.db("shop")
     const products = db.collection("products")
 
+    // ROOT
     app.get("/", (req, res) => {
       res.json({ message: "API is running" })
     })
 
-    app.get("/api/items", async (req, res) => {
-      const items = await products.find().toArray()
-      res.json(items)
-    })
-
-    app.post("/api/items", async (req, res) => {
-      const result = await products.insertOne(req.body)
-      res.json(result)
-    })
-
+    // VERSION (Practice Task 12)
     app.get("/version", (req, res) => {
-        res.json({
-          version: "1.1",
-          updatedAt: "2026-01-18"
-        })
+      res.json({
+        version: "1.1",
+        updatedAt: "2026-01-18"
+      })
     })
-    
+
+    // ITEMS ROUTES
+    app.use("/api/items", require("./routes/items")(products))
+
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`)
     })
@@ -51,4 +46,4 @@ client.connect()
     console.error("MongoDB connection FAILED")
     console.error(err)
     process.exit(1)
-  })
+})
