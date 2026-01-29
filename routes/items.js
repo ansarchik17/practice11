@@ -55,6 +55,34 @@ module.exports = (products) => {
     }
   })
 
+  // PATCH item 
+router.patch("/:id", async (req, res) => {
+  const { id } = req.params
+
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).json({ error: "Invalid item ID" })
+  }
+
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).json({ error: "No fields provided for update" })
+  }
+
+  try {
+    const result = await products.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: req.body }
+    )
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: "Item not found" })
+    }
+
+    res.json({ message: "Item partially updated" })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
   // DELETE item
   router.delete("/:id", async (req, res) => {
     try {
