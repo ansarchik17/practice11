@@ -1,10 +1,11 @@
 const express = require("express")
 const { ObjectId } = require("mongodb")
+const auth = require("../middleware/auth")
 
 module.exports = (products) => {
   const router = express.Router()
 
-  // GET all items
+  // GET all items (PUBLIC)
   router.get("/", async (req, res) => {
     try {
       const items = await products.find().toArray()
@@ -14,7 +15,7 @@ module.exports = (products) => {
     }
   })
 
-  // GET item by ID
+  // GET item by ID (PUBLIC)
   router.get("/:id", async (req, res) => {
     try {
       const item = await products.findOne({
@@ -31,8 +32,8 @@ module.exports = (products) => {
     }
   })
 
-  // POST create item
-  router.post("/", async (req, res) => {
+  // POST create item (PROTECTED)
+  router.post("/", auth, async (req, res) => {
     try {
       const result = await products.insertOne(req.body)
       res.status(201).json(result)
@@ -41,8 +42,8 @@ module.exports = (products) => {
     }
   })
 
-  // PUT update item
-  router.put("/:id", async (req, res) => {
+  // PUT update item (PROTECTED)
+  router.put("/:id", auth, async (req, res) => {
     try {
       await products.updateOne(
         { _id: new ObjectId(req.params.id) },
@@ -55,36 +56,22 @@ module.exports = (products) => {
     }
   })
 
-  // PATCH item 
-router.patch("/:id", async (req, res) => {
-  const { id } = req.params
+  // PATCH item (PROTECTED)
+  router.patch("/:id", auth, async (req, res) => {
+    try {
+      await products.updateOne(
+        { _id: new ObjectId(req.params.id) },
+        { $set: req.body }
+      )
 
-  if (!ObjectId.isValid(id)) {
-    return res.status(400).json({ error: "Invalid item ID" })
-  }
-
-  if (!req.body || Object.keys(req.body).length === 0) {
-    return res.status(400).json({ error: "No fields provided for update" })
-  }
-
-  try {
-    const result = await products.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: req.body }
-    )
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ message: "Item not found" })
+      res.json({ message: "Item partially updated" })
+    } catch (err) {
+      res.status(400).json({ error: err.message })
     }
+  })
 
-    res.json({ message: "Item partially updated" })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-})
-
-  // DELETE item
-  router.delete("/:id", async (req, res) => {
+  // DELETE item (PROTECTED)
+  router.delete("/:id", auth, async (req, res) => {
     try {
       await products.deleteOne({
         _id: new ObjectId(req.params.id)

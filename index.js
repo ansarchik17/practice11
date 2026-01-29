@@ -27,7 +27,7 @@ client.connect()
       res.json({ message: "API is running" })
     })
 
-    // VERSION (Practice Task 12)
+    // VERSION 
     app.get("/version", (req, res) => {
       res.json({
         version: "1.1",
