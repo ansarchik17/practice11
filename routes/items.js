@@ -5,7 +5,7 @@ const auth = require("../middleware/auth")
 module.exports = (products) => {
   const router = express.Router()
 
-  // GET all items (PUBLIC)
+  // GET all items 
   router.get("/", async (req, res) => {
     try {
       const items = await products.find().toArray()
@@ -15,7 +15,7 @@ module.exports = (products) => {
     }
   })
 
-  // GET item by ID (PUBLIC)
+  // GET item by ID 
   router.get("/:id", async (req, res) => {
     try {
       const item = await products.findOne({
